@@ -1,0 +1,171 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PZ2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+        }
+    }
+
+    interface IPerson
+    {
+        string Name { get; }
+        string Patronomic { get; }
+        string Lastname { get; }
+        DateTime Date { get; }
+        int Age { get; }
+    }
+
+    interface IUniversity
+    {
+        IEnumerable<IPerson> Persons { get; }   // отсортировать в соответствии с вариантом 1-й лабы
+        IEnumerable<Student> Students { get; }  // отсортировать в соответствии с вариантом 1-й лабы
+        IEnumerable<Teacher> Teachers { get; }  // отсортировать в соответствии с вариантом 1-й лабы
+
+        void Add(IPerson person);
+        void Remove(IPerson person);
+
+        IEnumerable<IPerson> FindByLastName(string lastName);
+        IEnumerable<Teacher> FindByDepartment(string text);
+    }
+
+    class Student : IPerson
+    {
+        Student(string name, string patronomic, string lastname, DateTime date, int age, int year, string group, double average_rate)
+        {
+            Name = name;
+            Patronomic = patronomic;
+            Lastname = lastname;
+            Date = date;
+            Age = age;
+            Year = year;
+            Group = group;
+            Average_rate = average_rate;
+        }
+
+        #region inherited properties
+        public string Name { get; }
+        public string Patronomic { get; }
+        public string Lastname { get; }
+        public DateTime Date { get; }
+        public int Age { get; }
+        #endregion
+
+        int Year { get; }
+        string Group { get; }
+        double Average_rate { get; }
+    }
+    class Teacher : IPerson
+    {
+        Teacher(string name, string patronomic, string lastname, DateTime date, int age, string departament, int experience, Position position)
+        {
+            Name = name;
+            Patronomic = patronomic;
+            Lastname = lastname;
+            Date = date;
+            Age = age;
+            Departament = departament;
+            Experience = experience;
+            this.position = position;
+        }
+
+
+        #region inherited properties
+        public string Name { get; }
+        public string Patronomic { get; }
+        public string Lastname { get; }
+        public DateTime Date { get; }
+        public int Age { get; }
+        #endregion
+        public string Departament { get; }
+        public int Experience { get; }
+        Position position { get; }
+
+        enum Position
+        {
+            Assistant,
+            Leacture,
+            HeadLeacture,
+            AssistantProfessor,
+            Professor,
+        }
+    }
+
+    class University : IUniversity
+    {
+        University(IEnumerable<IPerson> persons, IEnumerable<Student> students, IEnumerable<Teacher> teachers)
+        {
+            Persons = persons;
+            Students = students;
+            Teachers = teachers;
+        }
+
+        List<IPerson> persons = new List<IPerson>();
+
+        public IEnumerable<IPerson> Persons { get; }
+        public IEnumerable<Student> Students { get; }
+        public IEnumerable<Teacher> Teachers { get; }
+
+        public void Add(IPerson person)
+        {
+            persons.Add(person);
+        }
+        public void Remove(IPerson person)
+        {
+            persons.Remove(person);
+        }
+
+
+        public IEnumerable<IPerson> FindByLastName(string lastName)
+        {
+            foreach (var person in Persons)
+            {
+                if (person.Lastname == lastName)
+                {
+                    yield return person;
+                }
+            }
+        }
+
+        public IEnumerable<Teacher> FindByDepartment(string text)
+        {
+            foreach (var teacher in Teachers)
+            {
+                if (teacher.Departament.Contains(text))
+                {
+                    yield return teacher;
+                }
+            }
+        }
+
+        IEnumerable<IPerson> PersonSort()
+        {
+            foreach (var person in persons.Where(person => person is IPerson).Select(person => (IPerson)person).OrderBy(person => person.Date))
+            {
+                yield return person;
+            }
+            yield break;
+        }
+        IEnumerable<Student> StudentSort()
+        {
+            foreach (var student in persons.Where(student => student is Student).Select(student => (Student)student).OrderBy(student => student.Date))
+            {
+                yield return student;
+            }
+            yield break;
+        }
+        IEnumerable<Teacher> TeacherSort()
+        {
+            foreach (var teacher in persons.Where(person => person is Teacher).Select(teacher => (Teacher) teacher).OrderBy(teacher => teacher.Date))
+            {
+                yield return teacher;
+            }
+            yield break;
+        }
+    }
+}
