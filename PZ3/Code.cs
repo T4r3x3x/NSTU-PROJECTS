@@ -11,9 +11,14 @@ namespace PZ3
             Variable x = new Variable("x");
             Variable y = new Variable("y");
             Variable z = new Variable("z");
-
-            Vector vector = new Vector(new Expr[3] { x,y,z });
-            Console.WriteLine((vector - vector).Compute(new Dictionary<string, double> { ["x"] = 5, ["y"] = 3 , ["z"] = 1}));
+            Variable c = new Variable("c");
+            Constant alpha = new Constant(3);
+            foreach (var item in (x * y * z / x - z - c).Variables)
+            {
+                Console.WriteLine(item);
+            }
+          //  Vector vector = new Vector(new Expr[3] { x,y,z });
+          //  Console.WriteLine((vector - vector).Compute(new Dictionary<string, double> { ["x"] = 5, ["y"] = 3 , ["z"] = 1}));
 
            
         }
@@ -51,7 +56,7 @@ namespace PZ3
         }
         public override bool IsConstant => Arg1.IsConstant && Arg2.IsConstant;
         public override bool IsPolynom => Arg1.IsPolynom && Arg2.IsPolynom;
-        public override IEnumerable<string> Variables => Arg1.Variables.Union(Arg2.Variables);
+        public override IEnumerable<string> Variables => Arg2.Variables != null ? Arg1.Variables.Union(Arg2.Variables) : Arg1.Variables;
         public Expr Arg1 { get; }
         public Expr Arg2 { get; }
     }
