@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PZ3
 {
@@ -7,24 +8,14 @@ namespace PZ3
     {
         static void Main(string[] args)
         {
-            Variable a = new Variable("a");
-            Variable b = new Variable("b");
+            Variable x = new Variable("x");
+            Variable y = new Variable("y");
+            Variable z = new Variable("z");
 
-            var exp = (new Add(a, b));
-            Console.WriteLine(exp.Compute(new Dictionary<string, double> { ["a"] = 3.4, ["c"] = 7.6 }));
-            Console.WriteLine(new Sub(a, b).Compute(new Dictionary<string, double> { ["a"] = 3.4, ["b"] = 7.6 }));
-            Console.WriteLine(new Mult(a, b).Compute(new Dictionary<string, double> { ["a"] = 3.4, ["b"] = 7.6 }));
-            Console.WriteLine(new Divide(a, b).Compute(new Dictionary<string, double> { ["a"] = 3.4, ["b"] = 7.6 }));
+            Vector vector = new Vector(new Expr[3] { x,y,z });
+            Console.WriteLine((vector - vector).Compute(new Dictionary<string, double> { ["x"] = 5, ["y"] = 3 , ["z"] = 1}));
 
-            Console.WriteLine("\n\n");
-
-            Constant a1 = new Constant(3.4);
-            Constant b1 = new Constant(7.6);
-            var exp1 = (new Add(a1, b1));
-            Console.WriteLine(exp1.Compute(new Dictionary<string, double> { ["a"] = 0, ["b"] = 0 }));
-            Console.WriteLine(new Sub(a1, b1).Compute(new Dictionary<string, double> { ["a"] = 0, ["b"] = 0 }));
-            Console.WriteLine(new Mult(a1, b1).Compute(new Dictionary<string, double> { ["a"] = 0, ["b"] = 0 }));
-            Console.WriteLine(new Divide(a1, b1).Compute(new Dictionary<string, double> { ["a"] = 0, ["b"] = 0 }));
+           
         }
     }
 
@@ -40,17 +31,17 @@ namespace PZ3
     {
         public abstract double Compute(IReadOnlyDictionary<string, double> variableValues);
 
-        public IEnumerable<string> Variables { get; }
-        public bool IsConstant { get; }
-        public bool IsPolynom { get; }
-    }
-    abstract class UnaryOperation : Expr
-    {
-        public IEnumerable<string> Variables { get; }
-        public bool IsConstant { get; }
-        public bool IsPolynom { get; }
+        public virtual IEnumerable<string> Variables { get; }
+        public abstract bool IsConstant { get; }
+        public abstract bool IsPolynom { get; }
 
+        public static Add operator +(Expr a, Expr b) => new Add(a, b);
+        public static Sub operator -(Expr a, Expr b) => new Sub(a, b);
+        public static Mult operator *(Expr a, Expr b) => new Mult(a, b);
+        public static Divide operator /(Expr a, Expr b) => new Divide(a, b);
     }
+
+    #region Binary Operations
     abstract class BinaryOperation : Expr
     {
         public BinaryOperation(Expr arg1, Expr arg2)
@@ -58,15 +49,12 @@ namespace PZ3
             Arg1 = arg1;
             Arg2 = arg2;
         }
+        public override bool IsConstant => Arg1.IsConstant && Arg2.IsConstant;
+        public override bool IsPolynom => Arg1.IsPolynom && Arg2.IsPolynom;
+        public override IEnumerable<string> Variables => Arg1.Variables.Union(Arg2.Variables);
         public Expr Arg1 { get; }
         public Expr Arg2 { get; }
-
-        public IEnumerable<string> Variables { get; }
-        public bool IsConstant { get; }
-        public bool IsPolynom { get; }
-
     }
-    //abstract class Function : UnaryOperation { }
 
 
     class Add : BinaryOperation
@@ -76,9 +64,8 @@ namespace PZ3
         public override double Compute(IReadOnlyDictionary<string, double> variableValues) =>
             Arg1.Compute(variableValues) + Arg2.Compute(variableValues);
 
-        public IEnumerable<string> Variables { get; }
-        public bool IsConstant { get; }
-        public bool IsPolynom { get; }
+        public override string ToString() => $"{Arg1} + {Arg2}";
+
     }
     class Sub : BinaryOperation
     {
@@ -87,9 +74,8 @@ namespace PZ3
         public override double Compute(IReadOnlyDictionary<string, double> variableValues) =>
             Arg1.Compute(variableValues) - Arg2.Compute(variableValues);
 
-        public IEnumerable<string> Variables { get; }
-        public bool IsConstant { get; }
-        public bool IsPolynom { get; }
+
+        public override string ToString() => $"{Arg1} - " + (Arg2.GetType().IsSubclassOf(typeof(BinaryOperation)) ? $"({Arg2})" : $"{Arg2}");
     }
 
     class Mult : BinaryOperation
@@ -100,7 +86,7 @@ namespace PZ3
             Arg1.Compute(variableValues) * Arg2.Compute(variableValues);
 
 
-        public IEnumerable<string> Variables { get; }
+        public override string ToString() => $"{Arg1} * {Arg2}";
     }
 
     class Divide : BinaryOperation
@@ -110,8 +96,9 @@ namespace PZ3
         public override double Compute(IReadOnlyDictionary<string, double> variableValues) =>
             Arg1.Compute(variableValues) / Arg2.Compute(variableValues);
 
-        public IEnumerable<string> Variables { get; }
+        public override string ToString() => $"{Arg1} / {Arg2}";
     }
+    #endregion
 
     class Variable : Expr
     {
@@ -119,33 +106,186 @@ namespace PZ3
         {
             get;
         }
+        public override IEnumerable<string> Variables { get; }
 
         public Variable(string value)
         {
             Value = value;
+            Variables = new string[1] { value };
         }
+
+        public override bool IsConstant => false;
+        public override bool IsPolynom => true;
+
+
         public override double Compute(IReadOnlyDictionary<string, double> variableValues)
         {
-            foreach (var obj in variableValues)
-            {
-                if (Value == obj.Key)
-                    return obj.Value;                
-            }
-            throw new InvalidCastException("variableValues haven't key that equals variable");
+            double value;
+            variableValues.TryGetValue(Value, out value);
+            return value;
         }
+        public override string ToString() => Value;
     }
 
     class Constant : Expr
     {
-        public double Value
-        {
-            get;
-        }
+        public double Value { get; }
         public Constant(double value)
         {
             Value = value;
         }
 
+        public override bool IsConstant => true;
+        public override bool IsPolynom => true;
+
         public override double Compute(IReadOnlyDictionary<string, double> variableValues) => Value;
+        public override string ToString() => Value.ToString();
+    }
+
+    abstract class UnaryOperation : Expr
+    {
+        public UnaryOperation(Expr arg)
+        {
+            Arg = arg;
+        }
+        public override bool IsConstant => Arg.IsConstant;
+        public override bool IsPolynom => Arg.IsPolynom;
+        public override IEnumerable<string> Variables => Arg.Variables;
+        public Expr Arg { get; }
+    }
+
+    class Minus : UnaryOperation
+    {
+        public Minus(Expr a) : base(a) { }
+
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues)
+        {
+            return -Arg.Compute(variableValues);
+        }
+
+        public override string ToString()
+        {
+            return Arg.GetType().IsSubclassOf(typeof(BinaryOperation)) ? $"-({Arg})" : $"-{Arg}";
+        }
+    }
+
+    class Diff : UnaryOperation
+    {
+        public Diff(Expr arg) : base(arg) { }
+
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    abstract class Function : UnaryOperation
+    {
+        public Function(Expr a) : base(a) { }
+        public override bool IsPolynom => false;
+    }
+    class Cos : Function
+    {
+        public Cos(Expr a) : base(a) { }
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues) => Math.Cos(Arg.Compute(variableValues));
+        public override string ToString() => $"cos({Arg})";
+    }
+    class Sin : Function
+    {
+        public Sin(Expr a) : base(a) { }
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues) => Math.Sin(Arg.Compute(variableValues));
+
+        public override string ToString() => $"sin({Arg})";
+    }
+    class Tg : Function
+    {
+        public Tg(Expr a) : base(a) { }
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues) => Math.Tan(Arg.Compute(variableValues));
+
+        public override string ToString() => $"tg({Arg})";
+    }
+    class Ctg : Function
+    {
+        public Ctg(Expr a) : base(a) { }
+        public override double Compute(IReadOnlyDictionary<string, double> variableValues) => (1 / Math.Tan(Arg.Compute(variableValues)));
+
+        public override string ToString() => $"ctg({Arg})";
+    }
+
+    abstract class VExpr //написать скалярное и векторное произведение + реверс знаков
+    {
+        public abstract Expr[] Values { get; }
+
+        public abstract Vector Compute(IReadOnlyDictionary<string, double> variableValues);
+
+        public static Vector operator +(VExpr a, VExpr b)
+        {
+            Expr[] result = new Expr[a.Values.Length];
+            for (int i = 0; i < a.Values.Length; i++)
+            {
+                result[i] = a.Values[i] + b.Values[i];
+            }
+            return new Vector(result);
+        }
+        public static Vector operator -(VExpr a, VExpr b)
+        {
+            Expr[] result = new Expr[a.Values.Length];
+            for (int i = 0; i < a.Values.Length; i++)
+            {
+                result[i] = a.Values[i] - b.Values[i];
+            }
+            return new Vector(result);
+        }
+        public static Vector operator *(VExpr a, VExpr b)
+        {
+            Expr[] result = new Expr[a.Values.Length];
+            for (int i = 0; i < a.Values.Length; i++)
+            {
+                result[i] = a.Values[i] * b.Values[i];
+            }
+            return new Vector(result);
+        }
+    }
+
+    class Vector : VExpr 
+    {
+        Expr[] values;
+        public override Expr[] Values => values;
+        public Vector(Expr[] values) 
+        {
+            this.values = values;
+        }
+
+        public override Vector Compute(IReadOnlyDictionary<string, double> variableValues)
+        {
+            Constant[] result = new Constant[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                result[i] =new Constant(values[i].Compute(variableValues));
+            }
+            return new Vector(result);
+        }
+        public Expr Norm() //нет корня
+        {
+            Expr result = values[0] * values[0];
+
+            for (int i = 1; i < values.Length; i++)
+            {
+                result += values[i] * values[i];
+            }
+
+            return result;
+        }
+
+        public override string ToString()
+        {
+            string result = "(";
+            for (int i = 0; i < values.Length-1; i++)
+            {
+                result += $"{values[i]}, ";
+            }
+            result+=$"{values[values.Length-1]})";
+            return result;
+        }
     }
 }
