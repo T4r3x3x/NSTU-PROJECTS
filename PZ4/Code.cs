@@ -185,8 +185,61 @@ namespace UnitTest
         public void VariableException()
         {
             expr = x;
-            x.Compute(new Dictionary<string, double> { });
-            Assert.AreEqual(x, 0);
+            actual = x.Compute(new Dictionary<string, double> { });
+            expected = 0;
+            Assert.AreEqual(expected, actual);
+        }
+        [TestMethod]
+        public void ExprToString()
+        {
+            Variable z = new Variable("z");
+            Variable t = new Variable("t");
+            expr = (x+z)/(t-(t+y)*y)-(new Constant(4)-new Constant(2.5));
+            string expected = "(x + z) / (t - (t + y) * y) - (4 - 2,5)";
+            Assert.AreEqual(expected, expr.ToString());
+        }
+
+        [TestMethod]
+        public void VarVariablesProperty()
+        {
+            Variable z = new Variable("z");
+            Variable t = new Variable("t");
+            expr = (x + z) / (t - (t + y) * y) - (x - z);
+            char[] expected = { 'x', 'z', 't', 'y' };
+            char[] actual = expr.Variables.ToString().ToCharArray();
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+        [TestMethod]
+        public void ConstVariablesProperty()
+        {
+           Constant five = new Constant(5);
+            Constant four = new Constant(4);
+            expr = five + four;
+            IEnumerable<string> actual = expr.Variables;
+            IEnumerable<string> expected = null;
+            Assert.AreEqual(expected, actual);
+        }
+        [TestMethod]
+        public void ConstVarVariablesProperty()
+        {
+            Constant five = new Constant(5);
+            Constant four = new Constant(4);
+            expr = (five + four )+ (x + y);
+            char[] actual = expr.Variables.ToString().ToCharArray();
+            char[] expected = { 'x', 'y' };
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+        [TestMethod]
+        public void TrigToString()
+        {
+            Variable z = new Variable("z");
+            Variable t = new Variable("t");
+            expr = new Sin(x/y) * new Cos(y+x) - new Tg(z-y) / new Ctg(t*x);
+            string expected = "sin(x / y) * cos(y + x) - tg(z - y) / ctg(t * x)";
+            string actual = expr.ToString();
+            Assert.IsFalse(expr.IsConstant);
+            Assert.IsFalse(expr.IsPolynom);
+            Assert.AreEqual(expected, actual);
         }
     }
 }
