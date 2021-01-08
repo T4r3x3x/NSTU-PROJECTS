@@ -14,6 +14,133 @@ namespace PhysicsCompute
             converter[] CV = new converter[50];
             float ampermetr, voltmeter1, voltmeter2, I = 0, U1 = 0, U2 = 0, u1 = 0, u2 = 0, ii, t_crit, t_k, time_electron_movement, t_conductor = 0, t_environment = 0, eds = 0, ro_sopr = 0, t_max = 0, t_mid = 0;
             float timer = 0, Q = 0;
+
+            acc = 1;
+
+            t_conductor = 293.15f;
+
+            t_environment = 293.15f;
+
+            eds = 12;
+
+            ro_sopr = 0.017f;
+
+            e[0].R = 2;
+
+            e[1].R = 1;
+
+            e[2].R = 2;
+
+            e[3].R = 3;
+
+            e[4].R = 4;
+
+            e[5].R = 5;
+
+            e[6].R = 6;
+
+            e[0].a = 0.005f;
+
+            e[1].a = 0.004f;
+
+            e[2].a = 0.001f;
+
+            e[3].a = 0.002f;
+
+            e[4].a = 0.0017f;
+
+            e[5].a = 0.0034f;
+
+            e[6].a = 0.007f;
+
+            e[7].a = 0.0043f;
+
+            e[7].k = 3.2f;
+
+            e[7].k_e = 0.7f;
+
+            e[0].k = 0.6f;
+
+            e[1].k = 1.2f;
+
+            e[2].k = 1.4f;
+
+            e[3].k = 1.3f;
+
+            e[4].k = 1.6f;
+
+            e[5].k = 1.1f;
+
+            e[6].k = 1.3f;
+
+            e[1].k_e = 0.6f;
+
+            e[2].k_e = 0.8f;
+
+            e[3].k_e = 0.7f;
+
+            e[4].k_e = 0.9f;
+
+            e[5].k_e = 1.1f;
+
+            e[6].k_e = 0.3f;
+
+            e[0].ro = 3213;
+
+            e[1].ro = 7645;
+
+            e[2].ro = 8736;
+
+            e[3].ro = 2348;
+
+            e[4].ro = 2649;
+
+            e[5].ro = 5032;
+
+            e[6].ro = 1342;
+
+            e[7].ro = 8960;
+
+            e[0].c = 324;
+
+            e[1].c = 475;
+
+            e[2].c = 237;
+
+            e[3].c = 862;
+
+            e[4].c = 904;
+
+            e[5].c = 283;
+
+            e[6].c = 732;
+
+            e[7].c = 400;
+
+            e[1].s = 5;
+
+            e[2].s = 4.6f;
+
+            e[3].s = 2.4f;
+
+            e[4].s = 13.4f;
+
+            e[5].s = 2.14f;
+
+            e[6].s = 23.4f;
+
+            e[7].s = 0.4f;
+
+            time_electron_movement = 1;
+
+            u1 = 0.2f;
+
+            u2 = 0.2f;
+
+            ii = 0.2f;
+
+            t_crit = 1000;
+            /*
             Console.WriteLine("Введите необходимую точность расчёта (целое число, минимальное значение - 1):\n");
             acc =int.Parse(Console.ReadLine());
             time_electron_movement = 1 / acc;
@@ -75,7 +202,7 @@ namespace PhysicsCompute
             Console.WriteLine("Введите цену деления для амперметра (по умолчанию 0,2 ампера), А:\n");
             ii = float.Parse(Console.ReadLine());
             Console.WriteLine("Введите критическую температуру в цепи (при которой либо плавится проводник, либо выходят из строя приборы), °K:\n");
-            t_crit = float.Parse(Console.ReadLine());
+            t_crit = float.Parse(Console.ReadLine());*/
             e[0].k = e[7].k;
             e[0].s = (float)Math.PI * (10f * 10f); //площадь поперечного сечения источника
             e[0].m = e[0].ro * (e[0].s / 1000000f) * 0.07f; //масса источника
@@ -96,7 +223,7 @@ namespace PhysicsCompute
                     e[j].R /= (10 * acc);
                 }
                 impedance(e, Rr, acc, circuit);
-                Console.WriteLine("Полное сопротивление цепи равно: %f Ом\n", Rr[0]);
+                Console.WriteLine("Полное сопротивление цепи равно: %f Ом\n"+ Rr[0]);
                 converter_gen(CV, Rr, e);
                 electricity(ref t_mid, ref Q, e, Rr, CV, t_environment, time_electron_movement, eds, acc, circuit, ref t_max, ref I, ref U1, ref U2);
 
@@ -107,31 +234,31 @@ namespace PhysicsCompute
                     Console.WriteLine("Внимание: перегрузка амперметра!\n");
                     ampermetr = 180;
                 }
-                Console.WriteLine("Показания амперметра (в градусах отклонения стрелки (начальный 0, конечный 180)): %f°\n", ampermetr);
-                Console.WriteLine("Показания амперметра (в амперах): %f А\n", I);
+                Console.WriteLine("Показания амперметра (в градусах отклонения стрелки (начальный 0+ конечный 180)): %f°\n"+ ampermetr);
+                Console.WriteLine("Показания амперметра (в амперах): %f А\n"+ I);
                 voltmeter1 = U1 * 4 / u1;
                 if (U1 * 4 / u1 > 180)
                 {
                     Console.WriteLine("Внимание: перегрузка первого вольтметра!\n");
                     voltmeter1 = 180;
                 }
-                Console.WriteLine("Показания первого вольтметра (в градусах отклонения стрелки (начальный 0, конечный 180)): %f°\n", voltmeter1);
-                Console.WriteLine("Показания первого вольтметра (в вольтах): %f В\n", U1);
+                Console.WriteLine("Показания первого вольтметра (в градусах отклонения стрелки (начальный 0+ конечный 180)): %f°\n"+ voltmeter1);
+                Console.WriteLine("Показания первого вольтметра (в вольтах): %f В\n"+ U1);
                 voltmeter2 = U2 * 4 / u2;
                 if (U2 * 4 / u2 > 180)
                 {
                     Console.WriteLine("Внимание: перегрузка второго вольтметра!\n");
                     voltmeter2 = 180;
                 }
-                Console.WriteLine("Показания второго вольтметра (в градусах отклонения стрелки (начальный 0, конечный 180)): %f°\n", voltmeter2);
-                Console.WriteLine("Показания второго вольтметра (в вольтах): %f В\n", U2);
-                Console.WriteLine("Зафиксированная максимальная температура: %f°K\n", t_max);
-                Console.WriteLine("Средняя температура в цепи: %lf°K\n", t_mid / (638 * 2 * acc));
-                Console.WriteLine("Времени от начала работы программы в виртуальном мире самой программы прошло: %lf с\n", timer);
-                Console.WriteLine("Теплоты окружающей среде отдано: %lf Дж\n", Q);
+                Console.WriteLine("Показания второго вольтметра (в градусах отклонения стрелки (начальный 0+ конечный 180)): %f°\n"+ voltmeter2);
+                Console.WriteLine("Показания второго вольтметра (в вольтах): %f В\n"+ U2);
+                Console.WriteLine("Зафиксированная максимальная температура: %f°K\n"+ t_max);
+                Console.WriteLine("Средняя температура в цепи: %lf°K\n"+ t_mid / (638 * 1 * acc));
+                Console.WriteLine("Времени от начала работы программы в виртуальном мире самой программы прошло: %lf с\n"+ timer);
+                Console.WriteLine("Теплоты окружающей среде отдано: %lf Дж\n"+ Q);
                 for (int j = 0; j < 50; j++)
                 {
-                    Console.WriteLine("Температура участка %d: %f°К\n", j, circuit[CV[j].mid].t);
+                    Console.WriteLine("Температура участка  °К\n"+ j+ circuit[CV[j].mid].t);
                 }
                 Console.WriteLine("\n");
             }
