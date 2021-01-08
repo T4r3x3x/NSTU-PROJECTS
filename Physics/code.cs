@@ -15,7 +15,7 @@ namespace PhysicsCompute
             float ampermetr, voltmeter1, voltmeter2, I = 0, U1 = 0, U2 = 0, u1 = 0, u2 = 0, ii, t_crit, t_k, time_electron_movement, t_conductor = 0, t_environment = 0, eds = 0, ro_sopr = 0, t_max = 0, t_mid = 0;
             float timer = 0, Q = 0;
             Console.WriteLine("Введите необходимую точность расчёта (целое число, минимальное значение - 1):\n");
-            acc = Console.Read();
+            acc =int.Parse(Console.ReadLine());
             time_electron_movement = 1 / acc;
             Console.WriteLine("Введите начальную температуру проводника, °K:\n");
             t_conductor = float.Parse(Console.ReadLine());
