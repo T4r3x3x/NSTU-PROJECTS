@@ -1,8 +1,7 @@
         program main
-        implicit none 
-        real Pi
-        parameter(pi = 3.1415926535)      
-        real min_x, max_x, step_x, min_y, max_y, step_y, i, j,k
+        
+        real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
+        real temp
         integer steps_x, steps_y
         OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
         OPEN (2,FILE='C:\Users\hardb\Desktop\Output.txt') 
@@ -13,52 +12,55 @@
         read (1,*) min_y
         read (1,*) max_y
         read (1,*) step_y
-       
-        if(max_x .LT. min_x) then
-            write(2,*) 'x incorrent range'
-            stop
-        else if(max_y .LT. min_y) then
-            write(2,*) 'y incorrent range'
-            
-        else if(step_x .EQ. 0) then
-            write(2,*) 'step x incorrent range'
-            stop
-        else if(step_y .EQ. 0) then
-            write(2,*) 'step x incorrent range' 
-            stop
-        else
-            write(2,'(A$)') '             | '
-            do k = min_x, max_x, step_x
-                write(2,'(e12.4$, (A$))') k, ' | '
-                if(k+step_x .GT. max_x) then
-                    write(2,'(e12.4$, (A$))') max_x, ' | '
-                end if
-            end do 
-            write(2,*) ' '
+                
+        steps_x = (max_x-min_x)/step_x
+        steps_y = (max_y-min_y)/step_y
         
-            do i = min_y, max_y, step_y
-                write(2,'(e12.4$,(A$))') i, ' | '
-                do j = min_x, max_x, step_x
-                    call Func(j*pi/180.0,i*pi/180.0)    
+        
+        write(2,'(A$)') '             | '
+        
+         do i = 0, steps_x
+            x = sum_rump(min_x,i*step_x)  
+            write(2,'(e12.4$,(A$))') x, ' | '                   
+        end do
+        
+        if(x .LT. max_x) then
+            write(2,'(e12.4$, (A$))') max_x, ' | '
+        end if     
+        
+        write (2,*) ' '
+        
+        do i = 0, steps_y
+            y = sum_rump(min_y,i*step_y)
+            write(2,'(e12.4$,(A$))') y, ' | '
+            
+            do j = 0, steps_x
+                x = sum_rump(min_x,j*step_x)                
+                call func(x,y)                
+            end do 
+            
+            if(x .LT. max_x) then
+                call Func(max_x,y)
+            end if
+            
+            write (2,*) ' '
+            
                 
-                if(j+step_x .GT. max_x) then
-                    call Func(max_x,i)
-                end if                
-                end do
-                write (2,*) ' '
-                
-                if(i+step_y .GT. max_y) then
+        end do
+        if(y .LT. max_y) then
                     write(2,'(e12.4$,(A$))') max_y, ' | '
-                    do j = min_x, max_x, step_x
-                        call Func(j*pi/180.0,max_y)   
-                        if(j+step_x .GT. max_x) then
-                        call Func(max_x,i)
-                        end if 
-                    end do
-                end if
-            end do
-       end if 
-       end
+                    y = max_y
+                    do j = 0, steps_x
+                        x = sum_rump(min_x,j*step_x)                
+                        call func(x,y)                        
+                    end do 
+            
+                    if(x .LT. max_x) then
+                        call Func(max_x,y)
+                    end if
+            end if            
+        end    
+        
         
         
         
@@ -70,4 +72,24 @@
                 write(2, '(A$)') '  div. by 0  | '
             end if             
             return
+        end
+    
+
+        real function sum_rump (x,y)
+        implicit none
+        real x,y,e,two_sum,c,s
+        c = 0.0
+        s = two_sum (e, x, y)
+        c = c + e
+        sum_rump = s + c
+        end
+
+        real function two_sum (t, a, b)
+        implicit none
+        real t,a,b,s,bs,as
+         s = a + b
+         bs = s - a
+         as = s - bs
+        t = (b - bs) + (a - as)
+        two_sum = s
         end
