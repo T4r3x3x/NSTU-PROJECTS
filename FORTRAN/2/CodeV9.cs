@@ -3,8 +3,8 @@
         real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
         real temp
         integer steps_x, steps_y
-        OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
-        OPEN (2,FILE='C:\Users\hardb\Desktop\Output.txt') 
+        OPEN (1,FILE='C:\Users\pmi-b9205\Desktop\Input.txt')
+        OPEN (2,FILE='C:\Users\pmi-b9205\Desktop\Output.txt') 
         
         read (1,*) min_x 
         read (1,*) max_x
@@ -16,7 +16,8 @@
         steps_x = (max_x-min_x)/step_x
         steps_y = (max_y-min_y)/step_y
         
-        
+        call IsInvisible(min_x,max_x)
+        call Func(min_x,max_x)
         write(2,'(A$)') '             | '
         
          do i = 0, steps_x
@@ -62,6 +63,16 @@
         end    
         
         
+        
+        subroutine IsInvisible(x,y)
+        implicit none
+        real x,  y 
+        character*10 number
+        character*10 number_step
+        write(number,'(F10.2)') x
+        write(number_step,'(F10.2)') y
+        write(2,'(A)')number
+        end        
         
         
         subroutine Func(x, y)             
