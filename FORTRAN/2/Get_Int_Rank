@@ -1,0 +1,56 @@
+                program main
+                implicit none
+                real x
+                read *, x
+                call Exp(x)
+                end
+                
+                
+                
+                
+                subroutine Exp(x)
+                implicit none
+                real x, k
+                integer i, j
+                j = 0
+                k = 1
+                if(x .GE. 10000) then 
+                    j = x/10000
+                    k = 0.1
+                    if(x/10000 .NE. 0) then
+                        j = j + 1
+                    end if
+                else if (x .LT. 1000) then
+                    j = 1000/x   
+                    k = 10
+                end if
+                
+                call Times(j)
+                
+                do i = 1, j
+                    x = x * k
+                end do
+                print *, x
+                read *, x 
+                end
+                
+                subroutine Times(j)
+                implicit none
+                integer i, k, j                
+                k = j
+                if(j .NE. 0) then
+                j = 1
+                else 
+                j=0
+                end if
+                
+                do i = 1, 10
+                    if(k/10 .EQ. 0) then 
+                        return
+                    else
+                        k = k / 10
+                        j = j +1
+                    end if
+                end do
+                
+                end
