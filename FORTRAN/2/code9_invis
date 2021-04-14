@@ -1,9 +1,9 @@
         program main
-        implicit none 
-        real Pi
-        parameter(pi = 3.1415926535)      
-        real min_x, max_x, step_x, min_y, max_y, step_y, i, j,k
+        
+        real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
+        real temp
         integer steps_x, steps_y
+        logical invisible 
         OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
         OPEN (2,FILE='C:\Users\hardb\Desktop\Output.txt') 
         
@@ -13,57 +13,68 @@
         read (1,*) min_y
         read (1,*) max_y
         read (1,*) step_y
-       
-        if(max_x .LT. min_x) then
-            write(2,*) 'x incorrent range'
-            stop
-        else if(max_y .LT. min_y) then
-            write(2,*) 'y incorrent range'
+        
+        x = min_x
+        y = min_y
+                
+        steps_x = (max_x-min_x)/step_x
+        steps_y = (max_y-min_y)/step_y
+        
+        write(2,'(A$)') '             | '
+        
+         do i = 0, steps_x            
+            if(invisible(x,sum_rump(min_x,i*step_x))) then    
+                x = sum_rump(min_x,i*step_x)          
+                write(2,'(e12.4$,(A$))') x, ' | '                  
+            else   
+                x = sum_rump(min_x,i*step_x)  
+            end if              
+        end do
+        
+        if(x .LT. max_x) then
+            write(2,'(e12.4$, (A$))') max_x, ' | '
+        end if     
+        
+        write (2,*) ' '
+        
+        do i = 0, steps_y
+             if(invisible(y,sum_rump(min_y,i*step_y))) then 
+                y = sum_rump(min_y,i*step_y)
+                write(2,'(e12.4$,(A$))') y, ' | '
+             end if
+            y = sum_rump(min_y,i*step_y)
             
-        else if(step_x .EQ. 0) then
-            write(2,*) 'step x incorrent range'
-            stop
-        else if(step_y .EQ. 0) then
-            write(2,*) 'step x incorrent range' 
-            stop
-        else
-            write(2,'(A$)') '             | '
-            do k = min_x, max_x, step_x
-                write(2,'(e12.4$, (A$))') k, ' | '
-                if(k+step_x .GT. max_x) then
-                    write(2,'(f12.4$, (A$))') max_x, ' | '
-                    min_x = min_x + step_x
-                end if                
-            end do 
-            write(2,*) ' '
-        
-        
-        
-
-        
-            do i = min_y, max_y, step_y
-                write(2,'(e12.4$,(A$))') i, ' | '
-                do j = min_x, max_x, step_x
-                    call Func(j*pi/180.0,i*pi/180.0)    
-                
-                if(j+step_x .GT. max_x) then
-                    call Func(max_x,i)
-                end if                
-                end do
-                write (2,*) ' '
-                
-                if(i+step_y .GT. max_y) then
-                    write(2,'(e12.4$,(A$))') max_y, ' | '
-                    do j = min_x, max_x, step_x
-                        call Func(j*pi/180.0,max_y)   
-                        if(j+step_x .GT. max_x) then
-                        call Func(max_x,i)
-                        end if 
-                    end do
+            do j = 0, steps_x
+                if(invisible(x,sum_rump(min_x,i*step_x))) then 
+                    x = sum_rump(min_x,j*step_x)                
+                    call func(x,y)              
                 end if
-            end do
-        end if 
-        end
+                x = sum_rump(min_x,j*step_x)
+            end do 
+            
+            if(x .LT. max_x) then
+                call Func(max_x,y)
+            end if
+            
+            write (2,*) ' '                            
+        end do
+        
+        if(y .LT. max_y) then
+                    write(2,'(e12.4$,(A$))') max_y, ' | '
+                    y = max_y
+                    do j = 0, steps_x
+                        if(invisible(x,sum_rump(min_x,i*step_x))) then 
+                            x = sum_rump(min_x,j*step_x)                
+                            call func(x,y)              
+                        end if
+                        x = sum_rump(min_x,j*step_x)                       
+                    end do 
+            
+                    if(x .LT. max_x) then
+                        call Func(max_x,y)
+                    end if
+            end if            
+        end 
        
        
        
@@ -97,30 +108,49 @@
             return
         end
         
-        logical function IsInvisible(x,y)
-        implicit none
-        real x,y
-        integer a,b 
-        a = Exp(x)
-        b = Exp(y)
-        if( (a-b) .NE. 0) then
-            IsInvisible = .TRUE.
-            return
-        else
-            IsInvisible = .FALSE.
-            return
-        end if         
-        end
-        
-        
-                integer function Exp(x)
+               
+                  
+                 logical function Invisible(x,y)
+                 implicit none
+                 real x,y
+                 integer a,b
+                 call exp (x,a)
+                 call exp (y,b)
+                 print *, a
+                 print *, b
+                 if(a-b .EQ. 0) then
+                    Invisible = .FALSE.
+                    return
+                 else
+                    Invisible = .TRUE.                    
+                    return
+                  end if
+                  end
+                
+                
+                
+                
+                subroutine Exp(x, res)
                 implicit none
-                real x, k
-                integer i, j
+                real x, k, temp
+                integer i, j, res
+                temp = x
                 j = 0
-                k = 1
-                exp = x
-                if(x .GT. 10000) then 
+                k = 10
+                
+                if( x .EQ. 1) then 
+                j = 3
+                else if( x .EQ. 10) then  
+                j = 2 
+                else if( x .EQ. 100) then 
+                j = 1 
+                else if( x .EQ. 100) then 
+                res =  0
+                return
+                else 
+                
+                
+                if(x .GE. 10000) then 
                     j = x/10000
                     k = 0.1
                     if(x/10000 .NE. 0) then
@@ -129,17 +159,19 @@
                 else if (x .LT. 1000) then
                     j = 1000/x   
                     k = 10
-                    if(1000/x .NE. 0) then
-                        j = j + 1
-                    end if  
                 end if
                 
                 call Times(j)
                 
+                end if 
+                
+                
                 do i = 1, j
-                    exp = exp * k
-                end do
+                    temp = temp * k
+                end do  
+                res = int(temp)
                 end
+                
                 
                 subroutine Times(j)
                 implicit none
@@ -148,8 +180,9 @@
                 if(j .NE. 0) then
                 j = 1
                 else 
-                j = 0 
+                j=0
                 end if
+                
                 do i = 1, 10
                     if(k/10 .EQ. 0) then 
                         return
@@ -160,6 +193,3 @@
                 end do
                 
                 end
-       
-               
-                
