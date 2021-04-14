@@ -1,0 +1,34 @@
+        program main
+        
+        real steps_x, min_x, x, sum_rump,g
+        steps_x = 10
+        min_x = 0
+        step_x = 1
+        
+        do i = 1, steps_x  
+            x = sum_rump(min_x,i*step_x)          
+            print*, x
+        end do
+        
+        read *,x
+        end
+        
+        
+        
+        real function sum_rump (x,y)
+        real s, c, e, x, y
+        s = two_sum (e, y, x)
+        c = c + e
+        sum_rump = s + c
+        return
+        end
+
+        real function two_sum (error, a, b)
+        real s,bs,as,error,a,b
+        s = a + b
+        bs = s - a
+        as = s - bs
+        error = (b - bs) + (a - as)
+        two_sum = s
+        return
+        end
