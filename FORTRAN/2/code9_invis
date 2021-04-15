@@ -1,11 +1,11 @@
         program main
         
         real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
-        real temp
+        real temp, sum_rump
         integer steps_x, steps_y
         logical invisible 
-        OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
-        OPEN (2,FILE='C:\Users\hardb\Desktop\Output.txt') 
+        OPEN (1,FILE='C:\Users\irobo\Desktop\Input.txt')
+        OPEN (2,FILE='C:\Users\irobo\Desktop\Output.txt') 
         
         read (1,*) min_x 
         read (1,*) max_x
@@ -17,9 +17,8 @@
         x = min_x
         y = min_y
                 
-        steps_x = (max_x-min_x)/step_x
-        steps_y = (max_y-min_y)/step_y
-        
+        steps_x = (max_x-min_x)/step_x + 1
+        steps_y = (max_y-min_y)/step_y+ 1        
         write(2,'(A$)') '             | '
         
          do i = 0, steps_x            
@@ -29,7 +28,7 @@
             else   
                 x = sum_rump(min_x,i*step_x)  
             end if              
-        end do
+             end do
         
         if(x .LT. max_x) then
             write(2,'(e12.4$, (A$))') max_x, ' | '
@@ -41,15 +40,17 @@
              if(invisible(y,sum_rump(min_y,i*step_y))) then 
                 y = sum_rump(min_y,i*step_y)
                 write(2,'(e12.4$,(A$))') y, ' | '
-             end if
-            y = sum_rump(min_y,i*step_y)
-            
+             else
+                         y = sum_rump(min_y,i*step_y)
+            end if
+            x = min_x
             do j = 0, steps_x
-                if(invisible(x,sum_rump(min_x,i*step_x))) then 
+                if(invisible(x,sum_rump(min_x,j*step_x))) then 
                     x = sum_rump(min_x,j*step_x)                
                     call func(x,y)              
-                end if
+                else
                 x = sum_rump(min_x,j*step_x)
+                end if
             end do 
             
             if(x .LT. max_x) then
@@ -62,40 +63,42 @@
         if(y .LT. max_y) then
                     write(2,'(e12.4$,(A$))') max_y, ' | '
                     y = max_y
+                    x = min_x
                     do j = 0, steps_x
-                        if(invisible(x,sum_rump(min_x,i*step_x))) then 
+                        if(invisible(x,sum_rump(min_x,j*step_x))) then 
                             x = sum_rump(min_x,j*step_x)                
                             call func(x,y)              
-                        end if
+                        else 
                         x = sum_rump(min_x,j*step_x)                       
+                        end if
                     end do 
             
                     if(x .LT. max_x) then
                         call Func(max_x,y)
                     end if
-            end if            
+            end if                    
+        
         end 
        
        
        
-        REAL FUNCTION sum_rump(X)
-            real x,s,c,e, twosum
-            s = 0.0
-            c = 0.0
-            s = twosum(x,s,e)
-            sump_rump = s + c
-            return
-        end       
-       
-        REAL FUNCTION TWOSUM(ERROR, A, B)  
-      
-        IMPLICIT NONE
-        REAL A, B, ERROR
-        REAL s
+        real function sum_rump (x,y)
+        real s, c, e, x, y
+        s = two_sum (e, y, x)
+        c = c + e
+        sum_rump = s + c
+        return
+        end
+
+        real function two_sum (error, a, b)
+        real s,bs,as,error,a,b
         s = a + b
-       
-      
-        END
+        bs = s - a
+        as = s - bs
+        error = (b - bs) + (a - as)
+        two_sum = s
+        return
+        end
         
         
         subroutine Func(x, y)             
@@ -114,15 +117,14 @@
                  implicit none
                  real x,y
                  integer a,b
-                 call exp (x,a)
-                 call exp (y,b)
-                 print *, a
-                 print *, b
+                 a = int( exp (x))
+                 b = int( exp (y))
+
                  if(a-b .EQ. 0) then
-                    Invisible = .FALSE.
+                    Invisible = .TRUE.
                     return
                  else
-                    Invisible = .TRUE.                    
+                    Invisible = .FALSE.               
                     return
                   end if
                   end
@@ -130,66 +132,11 @@
                 
                 
                 
-                subroutine Exp(x, res)
+                real function Exp(x)
                 implicit none
-                real x, k, temp
-                integer i, j, res
-                temp = x
-                j = 0
-                k = 10
-                
-                if( x .EQ. 1) then 
-                j = 3
-                else if( x .EQ. 10) then  
-                j = 2 
-                else if( x .EQ. 100) then 
-                j = 1 
-                else if( x .EQ. 100) then 
-                res =  0
+                real x 
+                character*12 line
+                write(line,'(e12.4)') x
+                read(line,'(e12.4)')exp
                 return
-                else 
-                
-                
-                if(x .GE. 10000) then 
-                    j = x/10000
-                    k = 0.1
-                    if(x/10000 .NE. 0) then
-                        j = j + 1
-                    end if
-                else if (x .LT. 1000) then
-                    j = 1000/x   
-                    k = 10
-                end if
-                
-                call Times(j)
-                
-                end if 
-                
-                
-                do i = 1, j
-                    temp = temp * k
-                end do  
-                res = int(temp)
-                end
-                
-                
-                subroutine Times(j)
-                implicit none
-                integer i, k, j                
-                k = j
-                if(j .NE. 0) then
-                j = 1
-                else 
-                j=0
-                end if
-                
-                do i = 1, 10
-                    if(k/10 .EQ. 0) then 
-                        return
-                    else
-                        k = k / 10
-                        j = j +1
-                    end if
-                end do
-                
                 end
