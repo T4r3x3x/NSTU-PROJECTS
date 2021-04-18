@@ -1,11 +1,11 @@
-        program main
-        
+              program main
+                
         real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
         real temp, sum_rump
         integer steps_x, steps_y
-        logical invisible 
-        OPEN (1,FILE='C:\Users\irobo\Desktop\Input.txt')
-        OPEN (2,FILE='C:\Users\irobo\Desktop\Output.txt') 
+        logical AroundSame 
+        OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
+        OPEN (2,FILE='C:\Users\hardb\Desktop\Output.txt') 
         
         read (1,*) min_x 
         read (1,*) max_x
@@ -14,21 +14,21 @@
         read (1,*) max_y
         read (1,*) step_y
         
-        x = min_x
-        y = min_y
+        x = -min_x-1
+        y = -min_y-1
                 
-        steps_x = (max_x-min_x)/step_x + 1
-        steps_y = (max_y-min_y)/step_y+ 1        
+        steps_x = (max_x-min_x)/step_x
+        steps_y = (max_y-min_y)/step_y       
         write(2,'(A$)') '             | '
         
-         do i = 0, steps_x            
-            if(invisible(x,sum_rump(min_x,i*step_x))) then    
-                x = sum_rump(min_x,i*step_x)          
-                write(2,'(e12.4$,(A$))') x, ' | '                  
-            else   
-                x = sum_rump(min_x,i*step_x)  
-            end if              
-             end do
+        do i = 0, steps_x            
+           if(AroundSame(x,sum_rump(min_x,i*step_x))) then    
+               x = sum_rump(min_x,i*step_x)          
+               write(2,'(e12.4$,(A$))') x, ' | '                  
+           else   
+               x = sum_rump(min_x,i*step_x)  
+           end if              
+        end do
         
         if(x .LT. max_x) then
             write(2,'(e12.4$, (A$))') max_x, ' | '
@@ -37,19 +37,20 @@
         write (2,*) ' '
         
         do i = 0, steps_y
-             if(invisible(y,sum_rump(min_y,i*step_y))) then 
+            if(AroundSame(y,sum_rump(min_y,i*step_y))) then 
+               y = sum_rump(min_y,i*step_y)
+               write(2,'(e12.4$,(A$))') y, ' | '
+            else
                 y = sum_rump(min_y,i*step_y)
-                write(2,'(e12.4$,(A$))') y, ' | '
-             else
-                         y = sum_rump(min_y,i*step_y)
             end if
-            x = min_x
+            
+            x = -min_x-1
             do j = 0, steps_x
-                if(invisible(x,sum_rump(min_x,j*step_x))) then 
+                if(AroundSame(x,sum_rump(min_x,j*step_x))) then 
                     x = sum_rump(min_x,j*step_x)                
                     call func(x,y)              
                 else
-                x = sum_rump(min_x,j*step_x)
+                    x = sum_rump(min_x,j*step_x)
                 end if
             end do 
             
@@ -63,41 +64,40 @@
         if(y .LT. max_y) then
                     write(2,'(e12.4$,(A$))') max_y, ' | '
                     y = max_y
-                    x = min_x
+                    x = -min_x-1
                     do j = 0, steps_x
-                        if(invisible(x,sum_rump(min_x,j*step_x))) then 
+                        if(AroundSame(x,sum_rump(min_x,j*step_x))) then 
                             x = sum_rump(min_x,j*step_x)                
                             call func(x,y)              
                         else 
-                        x = sum_rump(min_x,j*step_x)                       
+                            x = sum_rump(min_x,j*step_x)                       
                         end if
                     end do 
             
                     if(x .LT. max_x) then
                         call Func(max_x,y)
                     end if
-            end if                    
-        
+            end if  
         end 
        
        
        
         real function sum_rump (x,y)
-        real s, c, e, x, y
-        s = two_sum (e, y, x)
-        c = c + e
-        sum_rump = s + c
-        return
+            real s, c, e, x, y
+            s = two_sum (e, y, x)
+            c = c + e
+            sum_rump = s + c
+            return
         end
 
         real function two_sum (error, a, b)
-        real s,bs,as,error,a,b
-        s = a + b
-        bs = s - a
-        as = s - bs
-        error = (b - bs) + (a - as)
-        two_sum = s
-        return
+            real s,bs,as,error,a,b
+            s = a + b
+            bs = s - a
+            as = s - bs
+            error = (b - bs) + (a - as)
+            two_sum = s
+            return
         end
         
         
@@ -113,18 +113,18 @@
         
                
                   
-                 logical function Invisible(x,y)
+                 logical function AroundSame(x,y)
                  implicit none
                  real x,y
                  integer a,b
-                 a = int( exp (x))
-                 b = int( exp (y))
+                 call exp(x,a)
+                 call exp(y,b)
 
                  if(a-b .EQ. 0) then
-                    Invisible = .TRUE.
+                    AroundSame = .FALSE.
                     return
                  else
-                    Invisible = .FALSE.               
+                    AroundSame = .TRUE.             
                     return
                   end if
                   end
@@ -132,11 +132,12 @@
                 
                 
                 
-                real function Exp(x)
+                subroutine Exp(x,result)
                 implicit none
-                real x 
+                real x,temp
+                integer result 
                 character*12 line
                 write(line,'(e12.4)') x
-                read(line,'(e12.4)')exp
-                return
+                read(line,'(e12.4)')temp
+                result = int(temp)                
                 end
