@@ -13,15 +13,21 @@
         read (1,*) max_y
         read (1,*) step_y
         
+        call around(min_x,min_x)
+        call around(min_y,min_y)
+        call around(max_x,max_x)                
+        call around(max_y,max_y)        
+        call around(step_x,step_x)
+        call around(step_y,step_y)
+      if((min_x .LE. max_x) .AND. (min_y .LE .max_y)) then
+      if((step_x.NE.0).AND.(step_y.NE.0))then
+        
         x = -min_x-1
         y = -min_y-1
                 
         steps_x = (max_x-min_x)/step_x
         steps_y = (max_y-min_y)/step_y       
         write(2,'(A$)') '             | '
-        
-        call around(max_x,max_x)
-        call around(max_y,max_y)
         
         do i = 0, steps_x            
            if(IsSame(x,min_x + i*step_x)) then    
@@ -74,7 +80,12 @@
                     if(x .LT. max_x) then
                         call Func(max_x,y)
                     end if
-            end if  
+            end if
+        end if    
+        else
+        print*, 'Error'
+        write(2,'(A)') 'Input data incorret' 
+        end if   
         end 
         
         subroutine Func(x, y) 
