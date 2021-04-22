@@ -1,10 +1,10 @@
-      program main
+        program main
                 
         real min_x, max_x, step_x, min_y, max_y, step_y, i, j,x,y
         integer steps_x, steps_y
         logical IsSame 
-        OPEN (1,FILE='C:\Users\hardb\Desktop\Input.txt')
-        OPEN (2,FILE='C:\Users\hardb\Desktop\Output1.txt') 
+        OPEN (1,FILE='C:\Users\pmi-b9205\Desktop\Input.txt')
+        OPEN (2,FILE='C:\Users\pmi-b9205\Desktop\Output1.txt') 
         
         read (1,*) min_x 
         read (1,*) max_x
@@ -20,15 +20,16 @@
         steps_y = (max_y-min_y)/step_y       
         write(2,'(A$)') '             | '
         
+        call around(max_x,max_x)
+        call around(max_y,max_y)
+        
         do i = 0, steps_x            
            if(IsSame(x,min_x + i*step_x)) then    
                x = min_x + i*step_x      
-               write(2,'(e12.4$,(A$))') x, ' | '                  
-           else   
-               write(2,'(A$)') '             | ' 
+               write(2,'(e12.4$,(A$))') x, ' | '  
            end if              
         end do
-        
+        call around(x,x)        
         if(x .LT. max_x) then
             write(2,'(e12.4$, (A$))') max_x, ' | '
         end if     
@@ -44,26 +45,21 @@
             do j = 0, steps_x
                 if(IsSame(x,min_x + j*step_x)) then 
                     x = min_x + j*step_x                
-                    call func(x,y)              
-                else
-                    write(2,'(A$)') '             | '
+                    call func(x,y)
                 end if
             end do 
-            
+            call around(x,x)
             if(x .LT. max_x) then
                 call Func(max_x,y)
             end if
             
-            write (2,*) ' ' 
-            
-            else
-            write(2,'(A$)') '             | '
+            write (2,*) ' '
             end if
                                    
         end do
         
         
-        
+        call around(y,y)
         if(y .LT. max_y) then
                     write(2,'(e12.4$,(A$))') max_y, ' | '
                     y = max_y
@@ -71,9 +67,7 @@
                     do j = 0, steps_x
                         if(IsSame(x,min_x + j*step_x)) then 
                             x = min_x + j*step_x                
-                            call func(x,y)              
-                        else 
-                            write(2,'(A$)') '             | '                       
+                            call func(x,y)                     
                         end if
                     end do 
             
@@ -85,15 +79,19 @@
         
         subroutine Func(x, y) 
             implicit none  
-            real x,y,yt,xt,Pi
+            real x,y,yt,xt,Pi,temp
             parameter(pi = 3.1415926535)
-            call Around(y,y) 
-            if (y .EQ. 90.0) then
+            call Around(y+90.0,yt) 
+            call Around(x,xt) 
+            if (mod(yt,180.0) .EQ. 0.0) then
                 write(2, '(A$)') '  div. by 0  | '      
-            else
-            call around(x*PI/180.0,xt)
-            call around(y*PI/180.0,yt)
-      write(2,'(e12.4$, A$)')abs(sin(xt)/cos(yt)),' | '                 
+            else if(mod(xt,180.0) .EQ. 0.0) then
+                write(2, '(A$)') '      0      | '
+            else 
+            call around(x,x)
+            call around(sin(x*PI/180.0),xt)
+            call around(cos(y*PI/180.0),yt)
+      write(2,'(e12.4$, A$)')abs(xt/yt),' | '                 
             end if             
             return
         end
